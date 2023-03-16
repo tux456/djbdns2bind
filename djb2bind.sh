@@ -42,13 +42,16 @@ while read line; do
 
   if [ $ZONETYPE == "PTR" ];then
     f2_short=$(echo $f2 |sed "s/$PTR_ORIGIN.//" )
+    if [ "$f2_short" == "$f2" ];then OUTZONE=true;fi
   elif [ "$ZONETYPE" == "DIRECT" ];then
     f1_short=$(echo $f1 |sed "s/.$ORIGIN//" )  
-    if [ "$ORIGIN" != "null" ];then AREC="$f1_short IN A $f2" ;else AREC="$f1 IN A $f2";fi
+    if [ "$f1_short" == "$f1" ];then OUTZONE=true;fi
   fi
  
  if [ "$DNS_TYPE" == "#" ];then echo ";  $LINE"
- elif [ "$DNS_TYPE" == "." ];then echo -e "$(echo $f1 |sed "s/$ORIGIN//" )\tIN NS $(echo $f3.|sed 's/[.][.]/./g')"
+   elif [ "$OUTZONE" == "true" ];then echo ";  OUTZONE:  $line"
+   elif [ "$DNS_TYPE" == "&" ];then echo -e "$(echo $f1 |sed "s/$ORIGIN//" )\tIN MX $f2 $f3"
+   elif [ "$DNS_TYPE" == "." ];then echo -e "$(echo $f1 |sed "s/$ORIGIN//" )\tIN NS $(echo $f3.|sed 's/[.][.]/./g')"
    elif [ "$DNS_TYPE" == "+" -a "$ZONETYPE" != "PTR" ];then echo -e "$f1_short\tIN A $f2"
    elif [ "$DNS_TYPE" == "+" -a "$ZONETYPE" == "PTR" ];then echo ";"
    elif [ "$DNS_TYPE" == "=" -a "$ZONETYPE" != "PTR" ];then echo -e "$f1_short\tIN A $f2"
