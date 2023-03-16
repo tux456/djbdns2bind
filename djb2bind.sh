@@ -40,6 +40,7 @@ while read line; do
   f3=${FIELDS[2]}
   f4=${FIELDS[3]}
 
+  OUTZONE=false
   if [ $ZONETYPE == "PTR" ];then
     f2_short=$(echo $f2 |sed "s/$PTR_ORIGIN.//" )
     if [ "$f2_short" == "$f2" ];then OUTZONE=true;fi
@@ -49,15 +50,16 @@ while read line; do
   fi
  
  if [ "$DNS_TYPE" == "#" ];then echo ";  $LINE"
-   elif [ "$OUTZONE" == "true" ];then echo ";  OUTZONE:  $line"
    elif [ "$DNS_TYPE" == "&" ];then echo -e "$(echo $f1 |sed "s/$ORIGIN//" )\tIN MX $f2 $f3"
    elif [ "$DNS_TYPE" == "." ];then echo -e "$(echo $f1 |sed "s/$ORIGIN//" )\tIN NS $(echo $f3.|sed 's/[.][.]/./g')"
-   elif [ "$DNS_TYPE" == "+" -a "$ZONETYPE" != "PTR" ];then echo -e "$f1_short\tIN A $f2"
    elif [ "$DNS_TYPE" == "+" -a "$ZONETYPE" == "PTR" ];then echo ";"
-   elif [ "$DNS_TYPE" == "=" -a "$ZONETYPE" != "PTR" ];then echo -e "$f1_short\tIN A $f2"
-   elif [ "$DNS_TYPE" == "=" -a "$ZONETYPE" == "PTR" ];then echo -e "$f2_short\tIN PTR $f1"
+   elif [ "$OUTZONE" == "true" ];then echo ";  OUTZONE:  $line"
    elif [ "$DNS_TYPE" == "C" ];then echo -e "$f1_short\tIN CNAME $f2"
    elif [ "$DNS_TYPE" == "'" ];then echo -e "$f1_short\tIN TXT \"$f2\" "
+   elif [ "$DNS_TYPE" == "+" -a "$ZONETYPE" != "PTR" ];then echo -e "$f1_short\tIN A $f2"
+   elif [ "$DNS_TYPE" == "=" -a "$ZONETYPE" != "PTR" ];then echo -e "$f1_short\tIN A $f2"
+   elif [ "$DNS_TYPE" == "=" -a "$ZONETYPE" == "PTR" ];then echo -e "$f2_short\tIN PTR $f1"
+
    elif [ "$line" == "" ];then echo ""
    else echo ";  CONVERSION NOT FOUND:  $line"
   fi
